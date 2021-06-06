@@ -187,7 +187,7 @@ def instalar_redis():
     os.system(comando)
     log("Redis instalado com sucesso!")
 
-def install_project_git(name_project: str, create_service = True):
+def install_project_git(name_project: str, create_service = False):
     log(f"Instalando {name_project}")
 
     command_download = f"cd {aeron_path} && git clone https://github.com/ElderVivot/{name_project}.git"
@@ -221,6 +221,7 @@ if __name__ == "__main__":
     instalar_nodejs()
     instalar_nssm()
     instalar_redis()
+    install_project_git('iacon-rest-api-pg')
     install_project_git('baymax-extracts-node')
-    #instalar_baymax_webscraping()
-    #instalar_baymax_iacon_api()
+    install_project_git('webscraping-nfe-nfce-go')
+    install_project_git('webscraping-nfse-goiania')
