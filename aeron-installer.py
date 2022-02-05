@@ -233,4 +233,9 @@ if __name__ == "__main__":
     install_project_git('webscraping-nfe-nfce-go-v2')
     install_project_git('webscraping-nfse-goiania')
     download_project_git('_start_services_aeron')
+    
+    log("Setando ExecutionPolicy")
     os.system("Set-ExecutionPolicy -ExecutionPolicy RemoteSigned")
+
+    log("Instalando pm2")
+    os.system("npm i -g pm2")
