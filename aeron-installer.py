@@ -223,5 +223,5 @@ if __name__ == "__main__":
     instalar_redis()
     install_project_git('iacon-rest-api-pg')
     install_project_git('baymax-extracts-node')
-    install_project_git('webscraping-nfe-nfce-go')
+    install_project_git('webscraping-nfe-nfce-go-v2')
     install_project_git('webscraping-nfse-goiania')
