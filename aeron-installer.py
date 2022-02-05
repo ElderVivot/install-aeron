@@ -187,6 +187,13 @@ def instalar_redis():
     os.system(comando)
     log("Redis instalado com sucesso!")
 
+def download_project_git(name_project: str):
+    log(f"Baixando {name_project}")
+
+    command_download = f"cd {aeron_path} && git clone https://github.com/ElderVivot/{name_project}.git"
+    print(command_download)
+    os.system(command_download)
+
 def install_project_git(name_project: str, create_service = False):
     log(f"Instalando {name_project}")
 
@@ -225,3 +232,5 @@ if __name__ == "__main__":
     install_project_git('baymax-extracts-node')
     install_project_git('webscraping-nfe-nfce-go-v2')
     install_project_git('webscraping-nfse-goiania')
+    download_project_git('_start_services_aeron')
+    os.system("Set-ExecutionPolicy -ExecutionPolicy RemoteSigned")
