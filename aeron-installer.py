@@ -156,22 +156,14 @@ def instalar_nodejs():
     comando = f"MsiExec.exe /i \"{download_path}\\nodejs.msi\" /qn"
     print(comando)
     os.system(comando)
-
-    comando = f"setx /M PATH \"%PATH%;C:\\Program Files\\nodejs\""
-    print(comando)
-    os.system(comando)
-
     log("NodeJS instalado com sucesso!")
 
 def instalar_nssm():
     log("Instalando o NSSM")
-    download("https://nssm.cc/release/nssm-2.24.zip", f"{download_path}\\nssm.zip")
+    download("http://nssm.cc/ci/nssm-2.24-101-g897c7ad.zip", f"{download_path}\\nssm.zip")
     with ZipFile(f"{download_path}\\nssm.zip", 'r') as zipObj:
         zipObj.extractall(f"{aeron_path}")
-    os.rename(f"{aeron_path}\\nssm-2.24", f"{aeron_path}\\nssm")
-    comando = f"setx /M PATH \"%PATH%;{aeron_path}\\nssm\\win64\""
-    print(comando)
-    os.system(comando)
+    os.rename(f"{aeron_path}\\nssm-2.24-101-g897c7ad", f"{aeron_path}\\nssm")    
     log("NSSM instalado com sucesso!")
 
 def instalar_redis():
@@ -179,40 +171,49 @@ def instalar_redis():
     download("https://github.com/microsoftarchive/redis/releases/download/win-3.2.100/Redis-x64-3.2.100.zip", f"{download_path}\\redis.zip")
     with ZipFile(f"{download_path}\\redis.zip", 'r') as zipObj:
         zipObj.extractall(f"{aeron_path}\\redis")
-    comando = f"setx /M PATH \"%PATH%;{aeron_path}\\redis\""
-    print(comando)
-    os.system(comando)
+
     comando = f"{aeron_path}\\redis\\redis-server --service-install"
     print(comando)
     os.system(comando)
     log("Redis instalado com sucesso!")
 
+def set_enviroments_path():
+    log("Setando variaveis ambiente")
+
+    git = 'C:\\Program Files\\Git\\bin'
+    nodejs = 'C:\\Program Files\\nodejs'
+    nssm = f'{aeron_path}\\nssm\\win64'
+    redis = f'{aeron_path}\\redis'
+    comando = f'setx /M PATH "%PATH%;{git};{nodejs};{nssm};{redis}"'
+    print(comando)
+    os.system(comando)
+
+    os.environ['PATH'] = f"{os.environ['PATH']};{git};{nodejs};{nssm};{redis}"
+
 def download_project_git(name_project: str):
-    from os import system
     log(f"Baixando {name_project}")
 
-    command_download = f"cd {aeron_path} && git clone https://github.com/ElderVivot/{name_project}.git"
+    command_download = f'cd "{aeron_path}" && git clone https://github.com/ElderVivot/{name_project}.git'
     print(command_download)
-    system(command_download)
+    os.system(command_download)
 
 def install_project_git(name_project: str, create_service = False):
-    from os import system
     log(f"Instalando {name_project}")
 
-    command_download = f"cd {aeron_path} && git clone https://github.com/ElderVivot/{name_project}.git"
+    command_download = f'cd "{aeron_path}" && git clone https://github.com/ElderVivot/{name_project}.git'
     print(command_download)
-    system(command_download)
+    os.system(command_download)
 
-    command_install_build = f"cd \"{aeron_path}\\{name_project}\" && npm i --legacy-peer-deps && npm run build"
+    command_install_build = f'cd "{aeron_path}\\{name_project}" && npm i --legacy-peer-deps && npm run build'
     print(command_install_build)
-    system(command_install_build)
+    os.system(command_install_build)
 
     copyfile(f"{aeron_path}\\{name_project}\\.env.example", f"{aeron_path}\\{name_project}\\.env")
 
     if create_service is True:
         command_service = f"{aeron_path}\\{name_project}\\create_service.bat"
         print(command_service)
-        system(command_service)
+        os.system(command_service)
 
     log(f"{name_project} instalado com sucesso!")
 
@@ -236,9 +237,8 @@ if __name__ == "__main__":
     install_project_git('webscraping-nfse-goiania')
     download_project_git('_start_services_aeron')
     
-    from os import system
     log("Setando ExecutionPolicy")
-    system("Set-ExecutionPolicy -ExecutionPolicy RemoteSigned")
+    os.system("Set-ExecutionPolicy -ExecutionPolicy RemoteSigned")
 
     log("Instalando pm2")
-    system("npm i -g pm2")
+    os.system("npm i -g pm2")
