@@ -188,29 +188,31 @@ def instalar_redis():
     log("Redis instalado com sucesso!")
 
 def download_project_git(name_project: str):
+    from os import system
     log(f"Baixando {name_project}")
 
     command_download = f"cd {aeron_path} && git clone https://github.com/ElderVivot/{name_project}.git"
     print(command_download)
-    os.system(command_download)
+    system(command_download)
 
 def install_project_git(name_project: str, create_service = False):
+    from os import system
     log(f"Instalando {name_project}")
 
     command_download = f"cd {aeron_path} && git clone https://github.com/ElderVivot/{name_project}.git"
     print(command_download)
-    os.system(command_download)
+    system(command_download)
 
     command_install_build = f"cd \"{aeron_path}\\{name_project}\" && npm i --legacy-peer-deps && npm run build"
     print(command_install_build)
-    os.system(command_install_build)
+    system(command_install_build)
 
     copyfile(f"{aeron_path}\\{name_project}\\.env.example", f"{aeron_path}\\{name_project}\\.env")
 
     if create_service is True:
         command_service = f"{aeron_path}\\{name_project}\\create_service.bat"
         print(command_service)
-        os.system(command_service)
+        system(command_service)
 
     log(f"{name_project} instalado com sucesso!")
 
@@ -234,8 +236,9 @@ if __name__ == "__main__":
     install_project_git('webscraping-nfse-goiania')
     download_project_git('_start_services_aeron')
     
+    from os import system
     log("Setando ExecutionPolicy")
-    os.system("Set-ExecutionPolicy -ExecutionPolicy RemoteSigned")
+    system("Set-ExecutionPolicy -ExecutionPolicy RemoteSigned")
 
     log("Instalando pm2")
-    os.system("npm i -g pm2")
+    system("npm i -g pm2")
