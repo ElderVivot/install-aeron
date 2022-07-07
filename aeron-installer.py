@@ -232,7 +232,7 @@ if __name__ == "__main__":
     instalar_nssm()
     instalar_redis()
     set_enviroments_path()
-    #install_project_git('iacon-rest-api-pg')
+    install_project_git('upload-certificates')
     install_project_git('baymax-extracts-node')
     install_project_git('webscraping-nfe-nfce-go-v2')
     install_project_git('webscraping-nfse-goiania-v2')
