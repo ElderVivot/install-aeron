@@ -17,9 +17,11 @@ from shutil import copyfile
 aeron_path = "C:\\aeron"
 download_path = "C:\\aeron\\downloads"
 
+
 def isUserAdmin():
-    if os.name == 'nt':
+    if os.name == "nt":
         import ctypes
+
         # WARNING: requires Windows XP SP2 or higher!
         try:
             return ctypes.windll.shell32.IsUserAnAdmin()
@@ -27,17 +29,18 @@ def isUserAdmin():
             traceback.print_exc()
             print("Admin check failed, assuming not an admin.")
             return False
-    elif os.name == 'posix':
+    elif os.name == "posix":
         # Check for root on Posix
         return os.getuid() == 0
     else:
         raise RuntimeError("Unsupported operating system for this module: %s" % (os.name,))
 
+
 def runAsAdmin(cmdLine=None, wait=True):
-    if os.name != 'nt':
+    if os.name != "nt":
         raise RuntimeError("This function is only implemented on Windows.")
 
-    process = subprocess.Popen(['python3', '-m', 'pip', 'install', 'pypiwin32'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process = subprocess.Popen(["python3", "-m", "pip", "install", "pypiwin32"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = process.communicate()
     for x in stderr.decode("utf-8").split("\r\n"):
         if x != "" and x[0:12].lower() != "deprecation:":
@@ -51,29 +54,26 @@ def runAsAdmin(cmdLine=None, wait=True):
 
     if cmdLine is None:
         cmdLine = [python_exe] + sys.argv
-    elif type(cmdLine) not in (types.TupleType,types.ListType):
+    elif type(cmdLine) not in (types.TupleType, types.ListType):
         raise ValueError("cmdLine is not a sequence.")
     cmd = '"%s"' % (cmdLine[0],)
 
     params = " ".join(['"%s"' % (x,) for x in cmdLine[1:]])
-    cmdDir = ''
+    cmdDir = ""
     showCmd = win32con.SW_SHOWNORMAL
-    lpVerb = 'runas'
+    lpVerb = "runas"
 
-    procInfo = ShellExecuteEx(nShow=showCmd,
-                            fMask=shellcon.SEE_MASK_NOCLOSEPROCESS,
-                            lpVerb=lpVerb,
-                            lpFile=cmd,
-                            lpParameters=params)
+    procInfo = ShellExecuteEx(nShow=showCmd, fMask=shellcon.SEE_MASK_NOCLOSEPROCESS, lpVerb=lpVerb, lpFile=cmd, lpParameters=params)
 
     if wait:
-        procHandle = procInfo['hProcess']    
+        procHandle = procInfo["hProcess"]
         obj = win32event.WaitForSingleObject(procHandle, win32event.INFINITE)
         rc = win32process.GetExitCodeProcess(procHandle)
     else:
         rc = None
 
     return rc
+
 
 def conferir_privilegios():
     # ASADMIN = 'asadmin'
@@ -92,84 +92,95 @@ def conferir_privilegios():
         rc = 0
     return rc
 
+
 if conferir_privilegios() > 0:
     sys.exit(0)
 
+
 def check_folder(_path):
-    if (not os.path.isdir(_path)):
+    if not os.path.isdir(_path):
         os.makedirs(_path)
+
 
 def log(msg, *params):
     print(msg, *params)
 
+
 def progress(downloaded, block_size, total_size):
     global download_size
     download_size = total_size
-    completed = int(downloaded / (total_size//block_size) * 100)
-    sys.stdout.write("\r|" + "█" * completed + " " * (100-completed) + "|{}%".format(completed))
+    completed = int(downloaded / (total_size // block_size) * 100)
+    sys.stdout.write("\r|" + "█" * completed + " " * (100 - completed) + "|{}%".format(completed))
 
-def download(url,filename):
+
+def download(url, filename):
     start = time.time()
     try:
-        urlretrieve(url,filename,progress)
+        urlretrieve(url, filename, progress)
     except URLError:
         sys.stderr.write("The URL is invalid.\n")
         exit(0)
     except Exception as e:
         sys.stderr.write("An error occured\n")
-        sys.stderr.write(type(e),e)
+        sys.stderr.write(type(e), e)
         exit(0)
     end = time.time()
-    print("\n",end="")
+    print("\n", end="")
     time_taken = end - start
-    download_speed = round(download_size/(time_taken*1024),2)
+    download_speed = round(download_size / (time_taken * 1024), 2)
     if download_speed >= 1024:
-        sys.stdout.write("Downloaded in " + str(round(time_taken,2)) + "s (" + str(download_speed/1024) + " MB/s)" + "\n")
+        sys.stdout.write("Downloaded in " + str(round(time_taken, 2)) + "s (" + str(download_speed / 1024) + " MB/s)" + "\n")
     if download_speed < 1024:
-        sys.stdout.write("Downloaded in " + str(round(time_taken,2)) + "s (" + str(download_speed) + " kB/s)" + "\n")
+        sys.stdout.write("Downloaded in " + str(round(time_taken, 2)) + "s (" + str(download_speed) + " kB/s)" + "\n")
     if download_speed < 1:
-        sys.stdout.write("Downloaded in " + str(round(time_taken,2)) + "s (" + str(download_speed*1024) + " B/s)" + "\n")
+        sys.stdout.write("Downloaded in " + str(round(time_taken, 2)) + "s (" + str(download_speed * 1024) + " B/s)" + "\n")
+
 
 def instalar_notepadpp():
     log("Instalando o Notepad++")
     download("https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v7.9.2/npp.7.9.2.Installer.x64.exe", f"{download_path}\\notepadpp.exe")
-    os.system(f"\"{download_path}\\notepadpp.exe\" /S")
+    os.system(f'"{download_path}\\notepadpp.exe" /S')
     log("Notepad++ instalado com sucesso!")
+
 
 def instalar_postgresql():
     log("Instalando o PostgreSQL")
     download("https://sbp.enterprisedb.com/getfile.jsp?fileid=1257415&_ga=2.140059251.1765645499.1611002386-1757516319.1611002386", f"{download_path}\\postgresql10.15.exe")
-    os.system(f"\"{download_path}\\postgresql10.15.exe\" --mode unattended --unattendedmodeui minimalWithDialogs  --superpassword postgres --datadir {aeron_path}\\postgresql")
+    os.system(f'"{download_path}\\postgresql10.15.exe" --mode unattended --unattendedmodeui minimalWithDialogs  --superpassword postgres --datadir {aeron_path}\\postgresql')
     log("PostgreSQL instalado com sucesso!")
+
 
 def instalar_git():
     log("Instalando o Git")
     download("https://github.com/git-for-windows/git/releases/download/v2.30.0.windows.2/Git-2.30.0.2-64-bit.exe", f"{download_path}\\git.exe")
-    comando = f"\"{download_path}\\git.exe\" /SILENT /SUPPRESSMSGBOXES /NORESTART /NOCANCEL /SP- /CLOSEAPPLICATIONS /RESTARTAPPLICATIONS /NOICONS"
+    comando = f'"{download_path}\\git.exe" /SILENT /SUPPRESSMSGBOXES /NORESTART /NOCANCEL /SP- /CLOSEAPPLICATIONS /RESTARTAPPLICATIONS /NOICONS'
     print(comando)
     os.system(comando)
     log("Git instalado com sucesso!")
 
+
 def instalar_nodejs():
     log("Instalando o NodeJS")
-    download("https://nodejs.org/dist/v14.16.0/node-v14.16.0-x64.msi", f"{download_path}\\nodejs.msi")
-    comando = f"MsiExec.exe /i \"{download_path}\\nodejs.msi\" /qn"
+    download("https://nodejs.org/dist/v18.15.0/node-v18.15.0-x64.msi", f"{download_path}\\nodejs.msi")
+    comando = f'MsiExec.exe /i "{download_path}\\nodejs.msi" /qn'
     print(comando)
     os.system(comando)
     log("NodeJS instalado com sucesso!")
 
+
 def instalar_nssm():
     log("Instalando o NSSM")
     download("http://nssm.cc/ci/nssm-2.24-101-g897c7ad.zip", f"{download_path}\\nssm.zip")
-    with ZipFile(f"{download_path}\\nssm.zip", 'r') as zipObj:
+    with ZipFile(f"{download_path}\\nssm.zip", "r") as zipObj:
         zipObj.extractall(f"{aeron_path}")
-    os.rename(f"{aeron_path}\\nssm-2.24-101-g897c7ad", f"{aeron_path}\\nssm")    
+    os.rename(f"{aeron_path}\\nssm-2.24-101-g897c7ad", f"{aeron_path}\\nssm")
     log("NSSM instalado com sucesso!")
+
 
 def instalar_redis():
     log("Instalando o Redis")
     download("https://github.com/microsoftarchive/redis/releases/download/win-3.2.100/Redis-x64-3.2.100.zip", f"{download_path}\\redis.zip")
-    with ZipFile(f"{download_path}\\redis.zip", 'r') as zipObj:
+    with ZipFile(f"{download_path}\\redis.zip", "r") as zipObj:
         zipObj.extractall(f"{aeron_path}\\redis")
 
     comando = f"{aeron_path}\\redis\\redis-server --service-install"
@@ -177,18 +188,20 @@ def instalar_redis():
     os.system(comando)
     log("Redis instalado com sucesso!")
 
+
 def set_enviroments_path():
     log("Setando variaveis ambiente")
 
-    git = 'C:\\Program Files\\Git\\bin'
-    nodejs = 'C:\\Program Files\\nodejs'
-    nssm = f'{aeron_path}\\nssm\\win64'
-    redis = f'{aeron_path}\\redis'
+    git = "C:\\Program Files\\Git\\bin"
+    nodejs = "C:\\Program Files\\nodejs"
+    nssm = f"{aeron_path}\\nssm\\win64"
+    redis = f"{aeron_path}\\redis"
     comando = f'setx /M PATH "%PATH%;{git};{nodejs};{nssm};{redis}"'
     print(comando)
     os.system(comando)
 
-    os.environ['PATH'] = f"{os.environ['PATH']};{git};{nodejs};{nssm};{redis}"
+    os.environ["PATH"] = f"{os.environ['PATH']};{git};{nodejs};{nssm};{redis}"
+
 
 def download_project_git(name_project: str):
     log(f"Baixando {name_project}")
@@ -197,7 +210,8 @@ def download_project_git(name_project: str):
     print(command_download)
     os.system(command_download)
 
-def install_project_git(name_project: str, create_service = False):
+
+def install_project_git(name_project: str, create_service=False):
     log(f"Instalando {name_project}")
 
     command_download = f'cd "{aeron_path}" && git clone https://github.com/ElderVivot/{name_project}.git'
@@ -217,27 +231,30 @@ def install_project_git(name_project: str, create_service = False):
 
     log(f"{name_project} instalado com sucesso!")
 
+
 def outros():
-    #corrigir erro no python
-    #comando = "python3 -m pip install --ignore-installed pywin32"
+    # corrigir erro no python
+    # comando = "python3 -m pip install --ignore-installed pywin32"
     pass
+
 
 if __name__ == "__main__":
     check_folder(aeron_path)
     check_folder(download_path)
     instalar_notepadpp()
-    #instalar_postgresql()
+    # instalar_postgresql()
     instalar_git()
     instalar_nodejs()
     instalar_nssm()
     instalar_redis()
     set_enviroments_path()
-    install_project_git('upload-certificates')
-    install_project_git('baymax-extracts-node')
-    install_project_git('webscraping-nfe-nfce-go-v2')
-    install_project_git('webscraping-nfse-goiania-v2')
-    download_project_git('_start_services_aeron')
-    
+    install_project_git("upload-certificates")
+    install_project_git("extract-data-domsistemas")
+    install_project_git("webscraping-nfe-nfce-go-v2")
+    install_project_git("webscraping-nfse-goiania-v2")
+    install_project_git("webscraping-nfse-gyn-dms-pdf")
+    download_project_git("_start_services_aeron")
+
     log("Setando ExecutionPolicy")
     os.system("Set-ExecutionPolicy -ExecutionPolicy RemoteSigned")
 
